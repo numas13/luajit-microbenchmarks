@@ -1,6 +1,5 @@
 local format, lower, sub = string.format, string.lower, string.sub
 local write = io.write
-local math = require("math")
 
 local n = 1e4
 local repeats = 10
@@ -1840,6 +1839,18 @@ local function bench_func(name, f, note, ...)
             end
             return os.clock() - tm, 20
         end)
+    elseif args_count == 4 then
+        bench(name, desc, function(n)
+            local f, x, y, z, w = f, args[1], args[2], args[3], args[4]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+            end
+            return os.clock() - tm, 20
+        end)
     else
         print("TODO: function with "..args_count.." arguments")
     end
@@ -1861,6 +1872,11 @@ local function bench_func_3(name, f, x, y, z, note)
     bench_func(name, f, note, x, y, z)
 end
 
+local function bench_func_4(name, f, x, y, z, w, note)
+    bench_func(name, f, note, x, y, z, w)
+end
+
+local math = require("math")
 local x = 13.13
 local y = 8
 
@@ -1924,6 +1940,36 @@ bench_func_1("ff_string_lower", string.lower, "FOOBAR123456")
 bench_func_1("ff_string_upper", string.upper, "abc")
 bench_func_1("ff_string_upper", string.upper, "foobar")
 bench_func_1("ff_string_upper", string.upper, "foobar123456")
+
+------------------------------------------------------------------------------
+-- Bit library
+------------------------------------------------------------------------------
+
+local bit = require("bit")
+
+bench_func_2("ff_bit_band", bit.band, 1, 1)
+bench_func_3("ff_bit_band", bit.band, 1, 3, 7)
+bench_func_4("ff_bit_band", bit.band, 1, 3, 7, 15)
+
+bench_func_2("ff_bit_bor", bit.bor, 1, 1)
+bench_func_3("ff_bit_bor", bit.bor, 1, 3, 7)
+bench_func_4("ff_bit_bor", bit.bor, 1, 3, 7, 15)
+
+bench_func_2("ff_bit_bxor", bit.bxor, 1, 1)
+bench_func_3("ff_bit_bxor", bit.bxor, 1, 3, 7)
+bench_func_4("ff_bit_bxor", bit.bxor, 1, 3, 7, 15)
+
+bench_func_1("ff_bit_tobit", bit.tobit, 123)
+bench_func_1("ff_bit_tobit", bit.tobit, 0xffffffff + 124)
+
+bench_func_1("ff_bit_bswap", bit.bswap, 0x12345678)
+bench_func_1("ff_bit_bnot", bit.bnot, 0)
+
+bench_func_2("ff_bit_lshift", bit.lshift, 1, 8)
+bench_func_2("ff_bit_rshift", bit.rshift, 0x100, 8)
+bench_func_2("ff_bit_arshift", bit.arshift, -256, 8)
+bench_func_2("ff_bit_rol", bit.rol, 0x12345678, 8)
+bench_func_2("ff_bit_ror", bit.ror, 0x12345678, 8)
 
 ------------------------------------------------------------------------------
 -- END
