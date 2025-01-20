@@ -2041,6 +2041,8 @@ local function is_enabled(name)
     return false
 end
 
+jit.off()
+
 for i,t in ipairs(benches) do
     if is_enabled(t.name) then
         local tm, ops = nil, 1

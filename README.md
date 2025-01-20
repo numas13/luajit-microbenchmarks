@@ -4,10 +4,6 @@
 
 Requirements to use microbenchmarks:
 
-* The microbenchmarks is only for luajit interpreter, not for JIT.
-  Disable JIT at runtime with `-j off` or build luajit with
-  `XCFLAGS=-DLUAJIT_DISABLE_JIT`.
-
 * The microbenchmarks is designed to run at fixed CPU frequency with disabled
   frequency boost. How to set fixed CPU frequency and disable frequency boots
   depends on used OS.
