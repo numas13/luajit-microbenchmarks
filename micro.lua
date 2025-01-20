@@ -2022,21 +2022,23 @@ if load_baseline then
     f = io.open(load_baseline, "r")
     if f ~= nil then
         for line in f:lines() do
-            local id = tonumber(string.match(line, "[^,]+"))
             local items = {}
-            for chunk in string.gmatch(line, ",[^,]+", 1) do
+            items[#items+1] = string.match(line, "[^\t]+")
+            for chunk in string.gmatch(line, "\t[^\t]+", 1) do
                 items[#items+1] = string.sub(chunk, 2)
             end
-            baseline[id] = {
-                tm = tonumber(items[1]),
-                iter = tonumber(items[2]),
-                iter_ops = tonumber(items[3]),
-                name = items[4],
-                desc = items[5],
-            }
+            local tm = tonumber(items[1])
+            local iter = tonumber(items[2])
+            local iter_ops = tonumber(items[3])
+            local name = items[4]
+            local desc = items[5]
+            if baseline[name] == nil then
+                baseline[name] = {}
+            end
+            baseline[name][desc] = { tm = tm, iter = iter, iter_ops = iter_ops }
         end
     else
-        io.stderr:write("warning: failed to read baseline file\n")
+        io.stderr:write(format("warning: failed to read baseline file \"%s\"\n\n", load_baseline))
     end
 end
 
@@ -2044,7 +2046,7 @@ local output = nil
 if save_baseline then
     output = io.open(save_baseline, "w")
     if output == nil then
-        io.stderr:write("error: failed to create baseline file\n")
+        io.stderr:write("error: failed to create baseline file \"%s\"\n", save_baseline)
         return
     end
 end
@@ -2056,18 +2058,8 @@ for i,f in ipairs(filter) do
     write(format("    filter: %s\n", f))
 end
 write(format("\n"))
-
-write(format("      c/i |    c/o"))
-if load_baseline then
-    write(format(" | change | change"))
-end
-write(format(" | group                | description\n"))
-
-write(format("----------|--------"))
-if load_baseline then
-    write(format("|--------|--------"))
-end
-write(format("|----------------------|-------------\n"))
+write(format("      c/i |    c/o | change | change | group                | description\n"))
+write(format("----------|--------|--------|--------|----------------------|-------------\n"))
 io.flush()
 
 local function is_enabled(name)
@@ -2096,7 +2088,7 @@ for i,t in ipairs(benches) do
         local cycles = tm * 1e9 * freq
         local iter = cycles / n
         local iter_ops = iter / ops
-        local b = baseline[i]
+        local b = baseline[t.name] and baseline[t.name][t.desc]
         local diff = 0
         write(format(" %8.1f | %6.1f", iter, iter_ops))
         if b ~= nil then
@@ -2107,12 +2099,12 @@ for i,t in ipairs(benches) do
             else
                 write(format(" |        |       "))
             end
-        elseif load_baseline then
-            write(format(" |        |       "))
+        else
+            write(format(" | ------ | ------"))
         end
         write(format(" | %-20s | %s\n", t.name, t.desc))
         if save_baseline then
-            output:write(format("%d,%f,%f,%f,%s,%s\n", i, tm, iter, iter_ops, t.name, t.desc))
+            output:write(format("%f\t%f\t%f\t%s\t%s\n", tm, iter, iter_ops, t.name, t.desc))
         end
         io.flush()
     end
