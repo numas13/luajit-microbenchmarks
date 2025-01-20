@@ -6,7 +6,7 @@ local repeats = 10
 local read_baseline = false
 local save_baseline = false
 local freq = nil
-local filter = nil
+local filter = {}
 
 local function print_usage()
     print("usage: micro freq [filter]")
@@ -44,11 +44,13 @@ for i,v in ipairs(arg) do
         save_baseline = true
     elseif freq == nil then
         freq = v
-    elseif filter == nil then
-        filter = v
     else
-        io.stderr:write(format("unexpected %s\n", v))
-        fail = true
+        if sub(v, 1, 1) == "-" then
+            io.stderr:write(format("unexpected %s\n", v))
+            fail = true
+        else
+            filter[#filter+1] = v
+        end
     end
 end
 
@@ -67,7 +69,9 @@ if freq == nil then
     return 1
 end
 
-filter = filter and lower(filter)
+for i,f in ipairs(filter) do
+    filter[i] = lower(f)
+end
 
 local benches = {}
 
@@ -2018,17 +2022,27 @@ end
 write(format(" frequency: %.1f\n", freq))
 write(format("iterations: %d\n", n))
 write(format("   repeats: %d\n", repeats))
-if filter ~= nil then
-    write(format("    filter: %s\n", filter))
-    filter = lower(filter)
+for i,f in ipairs(filter) do
+    write(format("    filter: %s\n", f))
 end
 write(format("\n"))
 
 write(format("   time |      c/i |    c/o | change | Bytecode             | Description\n"))
 write(format("--------|----------|--------|--------|----------------------|-------------\n"))
 
+local function is_enabled(name)
+    if #filter == 0 then return true end
+    local name = lower(name)
+    for i,f in ipairs(filter) do
+        if string.find(name, f) then
+            return true
+        end
+    end
+    return false
+end
+
 for i,t in ipairs(benches) do
-    if filter == nil or string.find(lower(t.name), filter) then
+    if is_enabled(t.name) then
         local tm, ops = nil, 1
         for i = 1,repeats do
             local t, o = t.func(n)
