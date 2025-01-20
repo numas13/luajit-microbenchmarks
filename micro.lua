@@ -2027,8 +2027,17 @@ for i,f in ipairs(filter) do
 end
 write(format("\n"))
 
-write(format("   time |      c/i |    c/o | change | Bytecode             | Description\n"))
-write(format("--------|----------|--------|--------|----------------------|-------------\n"))
+write(format("      c/i |    c/o"))
+if read_baseline then
+    write(format(" | change | change"))
+end
+write(format(" | group                | description\n"))
+
+write(format("----------|--------"))
+if read_baseline then
+    write(format("|--------|--------"))
+end
+write(format("|----------------------|-------------\n"))
 
 local function is_enabled(name)
     if #filter == 0 then return true end
@@ -2058,16 +2067,17 @@ for i,t in ipairs(benches) do
         local iter_ops = iter / ops
         local b = baseline[i]
         local diff = 0
-        write(format(" %6.2f | %8.1f | %6.1f", tm, iter, iter_ops))
+        write(format(" %8.1f | %6.1f", iter, iter_ops))
         if b ~= nil then
             local diff = iter_ops - b.iter_ops
             if math.abs(diff) >= 0.1 then
                 write(format(" | %6.1f", diff))
+                write(format(" | %5.0f%%", (iter_ops / b.iter_ops) * 100 - 100))
             else
-                write(format(" |       "))
+                write(format(" |        |       "))
             end
-        else
-            write(format(" | ------"))
+        elseif read_baseline then
+            write(format(" |        |       "))
         end
         write(format(" | %-20s | %s\n", t.name, t.desc))
         if save_baseline then
