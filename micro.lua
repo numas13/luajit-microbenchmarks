@@ -119,6 +119,8 @@ local function bench_func(name, f, note, ...)
             desc = desc.."\""..v.."\""
         elseif t == "table" then
             desc = desc.."#table"
+        elseif t == "function" then
+            desc = desc.."#function"
         else
             desc = desc..tostring(v)
         end
@@ -1935,6 +1937,16 @@ bench_func_2("ff_next", next, t, "key99")
 
 bench_func_1("ff_pairs", pairs, t)
 bench_func_1("ff_ipairs", ipairs, t)
+
+-- catch errors
+bench_func_1("ff_pcall", pcall, function() end)
+bench_func_2("ff_pcall", pcall, function() end, 0)
+bench_func_3("ff_pcall", pcall, function() end, 0, 0)
+bench_func_4("ff_pcall", pcall, function() end, 0, 0, 0)
+
+bench_func_2("ff_xpcall", xpcall, function() end, function() end)
+bench_func_3("ff_xpcall", xpcall, function() end, function() end, 0)
+bench_func_4("ff_xpcall", xpcall, function() end, function() end, 0, 0)
 
 ------------------------------------------------------------------------------
 -- Math library
