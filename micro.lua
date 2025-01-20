@@ -1,5 +1,6 @@
 local format, lower, sub = string.format, string.lower, string.sub
 local write = io.write
+local math = require("math")
 
 local n = 1e4
 local repeats = 10
@@ -1766,6 +1767,75 @@ bench("LOOP", "while x <= y do x = x + 1 end", function(n)
 end)
 
 ------------------------------------------------------------------------------
+-- Math library
+------------------------------------------------------------------------------
+
+local function bench_func_x(name, f, x, note)
+    local desc = format("%s(%.1f)", name, x)
+    if note then
+        desc = desc.." -- "..note
+    end
+    bench(name, desc, function(n)
+        local f, x = f, x
+        local tm = os.clock()
+        for i = 1,n do
+            f(x); f(x); f(x); f(x); f(x);
+            f(x); f(x); f(x); f(x); f(x);
+            f(x); f(x); f(x); f(x); f(x);
+            f(x); f(x); f(x); f(x); f(x);
+        end
+        return os.clock() - tm, 20
+    end)
+end
+
+local function bench_func_xy(name, f, x, y, note)
+    local desc = format("%s(%.1f, %.1f)", name, x, y)
+    if note then
+        desc = desc.." -- "..note
+    end
+    bench(name, desc, function(n)
+        local f, x, y = f, x, y
+        local tm = os.clock()
+        for i = 1,n do
+            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+        end
+        return os.clock() - tm, 20
+    end)
+end
+
+local x = 13.13
+local y = 8
+
+bench_func_x("ff_math_abs", math.abs, x)
+bench_func_x("ff_math_sqrt", math.sqrt, x)
+bench_func_x("ff_math_floor", math.floor, x)
+bench_func_x("ff_math_ceil", math.ceil, x)
+bench_func_x("ff_math_log", math.log, x)
+bench_func_x("ff_math_log10", math.log10, x)
+bench_func_x("ff_math_exp", math.exp, x)
+bench_func_x("ff_math_sin", math.sin, x)
+bench_func_x("ff_math_cos", math.cos, x)
+bench_func_x("ff_math_tan", math.tan, x)
+bench_func_x("ff_math_asin", math.asin, x)
+bench_func_x("ff_math_acos", math.acos, x)
+bench_func_x("ff_math_atan", math.atan, x)
+bench_func_x("ff_math_sinh", math.sinh, x)
+bench_func_x("ff_math_cosh", math.cosh, x)
+bench_func_x("ff_math_tanh", math.tanh, x)
+bench_func_x("ff_math_frexp", math.frexp, x)
+bench_func_x("ff_math_modf", math.modf, x)
+
+bench_func_xy("ff_math_pow", math.pow, x, y)
+bench_func_xy("ff_math_atan2", math.atan2, x, y)
+bench_func_xy("ff_math_fmod", math.fmod, x, y)
+bench_func_xy("ff_math_ldexp", math.ldexp, x, y)
+bench_func_xy("ff_math_min", math.min, x, y)
+bench_func_xy("ff_math_max", math.max, x, y)
+
+------------------------------------------------------------------------------
 -- END
 ------------------------------------------------------------------------------
 
@@ -1811,8 +1881,8 @@ if filter ~= nil then
 end
 write(format("\n"))
 
-write(format("   time |      c/i |    c/o | change | Bytecode | Description\n"))
-write(format("--------|----------|--------|--------|----------|-------------\n"))
+write(format("   time |      c/i |    c/o | change | Bytecode         | Description\n"))
+write(format("--------|----------|--------|--------|------------------|-------------\n"))
 
 for i,t in ipairs(benches) do
     if filter == nil or string.find(lower(t.name), filter) then
@@ -1831,11 +1901,16 @@ for i,t in ipairs(benches) do
         local diff = 0
         write(format(" %6.2f | %8.1f | %6.1f", tm, iter, iter_ops))
         if b ~= nil then
-            write(format(" | %6.1f", iter_ops - b.iter_ops))
+            local diff = iter_ops - b.iter_ops
+            if math.abs(diff) >= 0.1 then
+                write(format(" | %6.1f", diff))
+            else
+                write(format(" |       "))
+            end
         else
             write(format(" | ------"))
         end
-        write(format(" | %-8s | %s\n", t.name, t.desc))
+        write(format(" | %-16s | %s\n", t.name, t.desc))
         if save_baseline then
             output:write(format("%d,%f,%f,%f,%s,%s\n", i, tm, iter, iter_ops, t.name, t.desc))
         end
