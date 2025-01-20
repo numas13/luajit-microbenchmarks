@@ -112,10 +112,13 @@ local function bench_func(name, f, note, ...)
         if i > 1 then
             desc = desc..", "
         end
-        if type(v) == "number" then
+        local t = type(v)
+        if t == "number" then
             desc = desc..format("%.1f", v)
-        elseif type(v) == "string" then
+        elseif t == "string" then
             desc = desc.."\""..v.."\""
+        elseif t == "table" then
+            desc = desc.."#table"
         else
             desc = desc..tostring(v)
         end
@@ -1912,6 +1915,26 @@ bench_func_1("ff_tonumber", tonumber, 123)
 bench_func_1("ff_tonumber", tonumber, "123")
 bench_func_1("ff_tostring", tostring, "123")
 bench_func_1("ff_tostring", tostring, 123)
+
+-- iterators
+local t = {}
+for i = 1,30 do
+    t[#t+1] = i
+end
+bench_func_1("ff_next", next, t)
+bench_func_2("ff_next", next, t, 15)
+
+local t = {}
+for i = 1,99 do
+    t["key"..i] = i
+end
+bench_func_1("ff_next", next, t)
+bench_func_2("ff_next", next, t, "key1")
+bench_func_2("ff_next", next, t, "key33")
+bench_func_2("ff_next", next, t, "key99")
+
+bench_func_1("ff_pairs", pairs, t)
+bench_func_1("ff_ipairs", ipairs, t)
 
 ------------------------------------------------------------------------------
 -- Math library
