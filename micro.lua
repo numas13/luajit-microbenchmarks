@@ -1880,8 +1880,15 @@ end)
 -- Base library
 ------------------------------------------------------------------------------
 
+-- checks
 bench_func_1("ff_assert", assert, true)
 bench_func_1("ff_type", type, 0)
+
+-- conversions
+bench_func_1("ff_tonumber", tonumber, 123)
+bench_func_1("ff_tonumber", tonumber, "123")
+bench_func_1("ff_tostring", tostring, "123")
+bench_func_1("ff_tostring", tostring, 123)
 
 ------------------------------------------------------------------------------
 -- Math library
