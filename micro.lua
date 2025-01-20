@@ -2128,11 +2128,16 @@ for i,t in ipairs(benches) do
         write(format(" %8.1f | %6.1f", iter, iter_ops))
         if b ~= nil then
             local diff = iter_ops - b.iter_ops
-            if math.abs(diff) >= 0.1 then
+            local p = (iter_ops / b.iter_ops) * 100 - 100
+            if math.abs(p) >= 0.5 then
                 write(format(" | %6.1f", diff))
-                write(format(" | %5.0f%%", (iter_ops / b.iter_ops) * 100 - 100))
             else
-                write(format(" |        |       "))
+                write(format(" |       "))
+            end
+            if math.abs(p) >= 1.0 then
+                write(format(" | %5.0f%%", p))
+            else
+                write(format(" |       "))
             end
         else
             write(format(" | ------ | ------"))
