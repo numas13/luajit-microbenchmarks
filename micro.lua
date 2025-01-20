@@ -1,20 +1,29 @@
 local format, lower, sub = string.format, string.lower, string.sub
 local write = io.write
 
+local default_path = "baseline.csv"
+
 local n = 1e4
 local repeats = 10
-local read_baseline = false
-local save_baseline = false
+local load_baseline = nil
+local save_baseline = nil
 local freq = nil
 local filter = {}
 
 local function print_usage()
-    print("usage: micro freq [filter]")
+    print("Usage: micro FREQ [FILTER]")
     print()
-    print(" -n N")
-    print(" -r N")
-    print(" -b          read baseline")
-    print(" -s          save baseline")
+    print("Available positional items:")
+    print("    FREQ                     CPU frequency in GHz")
+    print("    FILTER                   REGEX strings to filter microbenchmarks")
+    print()
+    print("Available options:")
+    print("    -i N                     Set iteration count to N")
+    print("    -r N                     Set repeat count to N")
+    print("    -b                       Load baseline from "..default_path)
+    print("    -B PATH                  Load baseline from PATH")
+    print("    -s                       Save baseline to "..default_path)
+    print("    -S PATH                  Save baseline to PATH")
 end
 
 local fail, skip = false, false
@@ -24,7 +33,7 @@ for i,v in ipairs(arg) do
     elseif v == "-h" then
         print_usage()
         return
-    elseif v == "-n" then
+    elseif v == "-i" then
         n = tonumber(arg[i + 1])
         if not n then
             io.stderr:write("invalid -n\n")
@@ -39,9 +48,23 @@ for i,v in ipairs(arg) do
         end
         skip = true
     elseif v == "-b" then
-        read_baseline = true
+        load_baseline = default_path
+    elseif v == "-B" then
+        load_baseline = arg[i + 1]
+        if not load_baseline then
+            io.stderr:write("expect PATH for -B\n")
+            return 1
+        end
+        skip = true
     elseif v == "-s" then
-        save_baseline = true
+        save_baseline = default_path
+    elseif v == "-S" then
+        save_baseline = arg[i + 1]
+        if not save_baseline then
+            io.stderr:write("expect PATH for -S\n")
+            return 1
+        end
+        skip = true
     elseif freq == nil then
         freq = v
     else
@@ -1995,8 +2018,8 @@ bench_func_2("ff_bit_ror", bit.ror, 0x12345678, 8)
 
 local baseline = {}
 
-if read_baseline then
-    f = io.open("baseline", "r")
+if load_baseline then
+    f = io.open(load_baseline, "r")
     if f ~= nil then
         for line in f:lines() do
             local id = tonumber(string.match(line, "[^,]+"))
@@ -2019,7 +2042,7 @@ end
 
 local output = nil
 if save_baseline then
-    output = io.open("baseline", "w")
+    output = io.open(save_baseline, "w")
     if output == nil then
         io.stderr:write("error: failed to create baseline file\n")
         return
@@ -2035,16 +2058,17 @@ end
 write(format("\n"))
 
 write(format("      c/i |    c/o"))
-if read_baseline then
+if load_baseline then
     write(format(" | change | change"))
 end
 write(format(" | group                | description\n"))
 
 write(format("----------|--------"))
-if read_baseline then
+if load_baseline then
     write(format("|--------|--------"))
 end
 write(format("|----------------------|-------------\n"))
+io.flush()
 
 local function is_enabled(name)
     if #filter == 0 then return true end
@@ -2083,13 +2107,14 @@ for i,t in ipairs(benches) do
             else
                 write(format(" |        |       "))
             end
-        elseif read_baseline then
+        elseif load_baseline then
             write(format(" |        |       "))
         end
         write(format(" | %-20s | %s\n", t.name, t.desc))
         if save_baseline then
             output:write(format("%d,%f,%f,%f,%s,%s\n", i, tm, iter, iter_ops, t.name, t.desc))
         end
+        io.flush()
     end
 end
 
