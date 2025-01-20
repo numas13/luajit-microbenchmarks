@@ -75,6 +75,113 @@ local function bench(name, desc, func)
     benches[#benches+1] = { name = name, desc = desc, func = func }
 end
 
+local function bench_func(name, f, note, ...)
+    local args_count = select("#", ...)
+    local desc = name.."("
+    local args = {}
+    for i = 1,args_count do
+        local v = select(i, ...)
+        args[i] = v
+        if i > 1 then
+            desc = desc..", "
+        end
+        if type(v) == "number" then
+            desc = desc..format("%.1f", v)
+        elseif type(v) == "string" then
+            desc = desc.."\""..v.."\""
+        else
+            desc = desc..tostring(v)
+        end
+    end
+    desc = desc..")"
+    if note then
+        desc = desc.." -- "..note
+    end
+    if args_count == 0 then
+        bench(name, desc, function(n)
+            local f = f
+            local tm = os.clock()
+            for i = 1,n do
+                f(); f(); f(); f(); f();
+                f(); f(); f(); f(); f();
+                f(); f(); f(); f(); f();
+                f(); f(); f(); f(); f();
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 1 then
+        bench(name, desc, function(n)
+            local f, x = f, args[1]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x); f(x); f(x); f(x); f(x);
+                f(x); f(x); f(x); f(x); f(x);
+                f(x); f(x); f(x); f(x); f(x);
+                f(x); f(x); f(x); f(x); f(x);
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 2 then
+        bench(name, desc, function(n)
+            local f, x, y = f, args[1], args[2]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 3 then
+        bench(name, desc, function(n)
+            local f, x, y, z = f, args[1], args[2], args[3]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 4 then
+        bench(name, desc, function(n)
+            local f, x, y, z, w = f, args[1], args[2], args[3], args[4]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
+            end
+            return os.clock() - tm, 20
+        end)
+    else
+        print("TODO: function with "..args_count.." arguments")
+    end
+end
+
+local function bench_func_0(name, f, note)
+    bench_func(name, f, note)
+end
+
+local function bench_func_1(name, f, x, note)
+    bench_func(name, f, note, x)
+end
+
+local function bench_func_2(name, f, x, y, note)
+    bench_func(name, f, note, x, y)
+end
+
+local function bench_func_3(name, f, x, y, z, note)
+    bench_func(name, f, note, x, y, z)
+end
+
+local function bench_func_4(name, f, x, y, z, w, note)
+    bench_func(name, f, note, x, y, z, w)
+end
+
 ------------------------------------------------------------------------------
 -- ISGT
 ------------------------------------------------------------------------------
@@ -1766,115 +1873,15 @@ bench("LOOP", "while x <= y do x = x + 1 end", function(n)
 end)
 
 ------------------------------------------------------------------------------
--- Math library
+-- Base library
 ------------------------------------------------------------------------------
 
-local function bench_func(name, f, note, ...)
-    local args_count = select("#", ...)
-    local desc = name.."("
-    local args = {}
-    for i = 1,args_count do
-        local v = select(i, ...)
-        args[i] = v
-        if i > 1 then
-            desc = desc..", "
-        end
-        if type(v) == "number" then
-            desc = desc..format("%.1f", v)
-        elseif type(v) == "string" then
-            desc = desc.."\""..v.."\""
-        else
-            desc = desc..tostring(v)
-        end
-    end
-    desc = desc..")"
-    if note then
-        desc = desc.." -- "..note
-    end
-    if args_count == 0 then
-        bench(name, desc, function(n)
-            local f = f
-            local tm = os.clock()
-            for i = 1,n do
-                f(); f(); f(); f(); f();
-                f(); f(); f(); f(); f();
-                f(); f(); f(); f(); f();
-                f(); f(); f(); f(); f();
-            end
-            return os.clock() - tm, 20
-        end)
-    elseif args_count == 1 then
-        bench(name, desc, function(n)
-            local f, x = f, args[1]
-            local tm = os.clock()
-            for i = 1,n do
-                f(x); f(x); f(x); f(x); f(x);
-                f(x); f(x); f(x); f(x); f(x);
-                f(x); f(x); f(x); f(x); f(x);
-                f(x); f(x); f(x); f(x); f(x);
-            end
-            return os.clock() - tm, 20
-        end)
-    elseif args_count == 2 then
-        bench(name, desc, function(n)
-            local f, x, y = f, args[1], args[2]
-            local tm = os.clock()
-            for i = 1,n do
-                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-            end
-            return os.clock() - tm, 20
-        end)
-    elseif args_count == 3 then
-        bench(name, desc, function(n)
-            local f, x, y, z = f, args[1], args[2], args[3]
-            local tm = os.clock()
-            for i = 1,n do
-                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
-                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
-                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
-                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
-            end
-            return os.clock() - tm, 20
-        end)
-    elseif args_count == 4 then
-        bench(name, desc, function(n)
-            local f, x, y, z, w = f, args[1], args[2], args[3], args[4]
-            local tm = os.clock()
-            for i = 1,n do
-                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
-                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
-                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
-                f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w); f(x, y, z, w);
-            end
-            return os.clock() - tm, 20
-        end)
-    else
-        print("TODO: function with "..args_count.." arguments")
-    end
-end
+bench_func_1("ff_assert", assert, true)
+bench_func_1("ff_type", type, 0)
 
-local function bench_func_0(name, f, note)
-    bench_func(name, f, note)
-end
-
-local function bench_func_1(name, f, x, note)
-    bench_func(name, f, note, x)
-end
-
-local function bench_func_2(name, f, x, y, note)
-    bench_func(name, f, note, x, y)
-end
-
-local function bench_func_3(name, f, x, y, z, note)
-    bench_func(name, f, note, x, y, z)
-end
-
-local function bench_func_4(name, f, x, y, z, w, note)
-    bench_func(name, f, note, x, y, z, w)
-end
+------------------------------------------------------------------------------
+-- Math library
+------------------------------------------------------------------------------
 
 local math = require("math")
 local x = 13.13
