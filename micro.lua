@@ -1770,70 +1770,160 @@ end)
 -- Math library
 ------------------------------------------------------------------------------
 
-local function bench_func_x(name, f, x, note)
-    local desc = format("%s(%.1f)", name, x)
+local function bench_func(name, f, note, ...)
+    local args_count = select("#", ...)
+    local desc = name.."("
+    local args = {}
+    for i = 1,args_count do
+        local v = select(i, ...)
+        args[i] = v
+        if i > 1 then
+            desc = desc..", "
+        end
+        if type(v) == "number" then
+            desc = desc..format("%.1f", v)
+        elseif type(v) == "string" then
+            desc = desc.."\""..v.."\""
+        else
+            desc = desc..tostring(v)
+        end
+    end
+    desc = desc..")"
     if note then
         desc = desc.." -- "..note
     end
-    bench(name, desc, function(n)
-        local f, x = f, x
-        local tm = os.clock()
-        for i = 1,n do
-            f(x); f(x); f(x); f(x); f(x);
-            f(x); f(x); f(x); f(x); f(x);
-            f(x); f(x); f(x); f(x); f(x);
-            f(x); f(x); f(x); f(x); f(x);
-        end
-        return os.clock() - tm, 20
-    end)
+    if args_count == 0 then
+        bench(name, desc, function(n)
+            local f = f
+            local tm = os.clock()
+            for i = 1,n do
+                f(); f(); f(); f(); f();
+                f(); f(); f(); f(); f();
+                f(); f(); f(); f(); f();
+                f(); f(); f(); f(); f();
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 1 then
+        bench(name, desc, function(n)
+            local f, x = f, args[1]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x); f(x); f(x); f(x); f(x);
+                f(x); f(x); f(x); f(x); f(x);
+                f(x); f(x); f(x); f(x); f(x);
+                f(x); f(x); f(x); f(x); f(x);
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 2 then
+        bench(name, desc, function(n)
+            local f, x, y = f, args[1], args[2]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+                f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
+            end
+            return os.clock() - tm, 20
+        end)
+    elseif args_count == 3 then
+        bench(name, desc, function(n)
+            local f, x, y, z = f, args[1], args[2], args[3]
+            local tm = os.clock()
+            for i = 1,n do
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+                f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z); f(x, y, z);
+            end
+            return os.clock() - tm, 20
+        end)
+    else
+        print("TODO: function with "..args_count.." arguments")
+    end
 end
 
-local function bench_func_xy(name, f, x, y, note)
-    local desc = format("%s(%.1f, %.1f)", name, x, y)
-    if note then
-        desc = desc.." -- "..note
-    end
-    bench(name, desc, function(n)
-        local f, x, y = f, x, y
-        local tm = os.clock()
-        for i = 1,n do
-            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-            f(x, y); f(x, y); f(x, y); f(x, y); f(x, y);
-        end
-        return os.clock() - tm, 20
-    end)
+local function bench_func_0(name, f, note)
+    bench_func(name, f, note)
+end
+
+local function bench_func_1(name, f, x, note)
+    bench_func(name, f, note, x)
+end
+
+local function bench_func_2(name, f, x, y, note)
+    bench_func(name, f, note, x, y)
+end
+
+local function bench_func_3(name, f, x, y, z, note)
+    bench_func(name, f, note, x, y, z)
 end
 
 local x = 13.13
 local y = 8
 
-bench_func_x("ff_math_abs", math.abs, x)
-bench_func_x("ff_math_sqrt", math.sqrt, x)
-bench_func_x("ff_math_floor", math.floor, x)
-bench_func_x("ff_math_ceil", math.ceil, x)
-bench_func_x("ff_math_log", math.log, x)
-bench_func_x("ff_math_log10", math.log10, x)
-bench_func_x("ff_math_exp", math.exp, x)
-bench_func_x("ff_math_sin", math.sin, x)
-bench_func_x("ff_math_cos", math.cos, x)
-bench_func_x("ff_math_tan", math.tan, x)
-bench_func_x("ff_math_asin", math.asin, x)
-bench_func_x("ff_math_acos", math.acos, x)
-bench_func_x("ff_math_atan", math.atan, x)
-bench_func_x("ff_math_sinh", math.sinh, x)
-bench_func_x("ff_math_cosh", math.cosh, x)
-bench_func_x("ff_math_tanh", math.tanh, x)
-bench_func_x("ff_math_frexp", math.frexp, x)
-bench_func_x("ff_math_modf", math.modf, x)
+bench_func_1("ff_math_abs", math.abs, x)
+bench_func_1("ff_math_sqrt", math.sqrt, x)
+bench_func_1("ff_math_floor", math.floor, x)
+bench_func_1("ff_math_ceil", math.ceil, x)
+bench_func_1("ff_math_log", math.log, x)
+bench_func_1("ff_math_log10", math.log10, x)
+bench_func_1("ff_math_exp", math.exp, x)
+bench_func_1("ff_math_sin", math.sin, x)
+bench_func_1("ff_math_cos", math.cos, x)
+bench_func_1("ff_math_tan", math.tan, x)
+bench_func_1("ff_math_asin", math.asin, x)
+bench_func_1("ff_math_acos", math.acos, x)
+bench_func_1("ff_math_atan", math.atan, x)
+bench_func_1("ff_math_sinh", math.sinh, x)
+bench_func_1("ff_math_cosh", math.cosh, x)
+bench_func_1("ff_math_tanh", math.tanh, x)
+bench_func_1("ff_math_frexp", math.frexp, x)
+bench_func_1("ff_math_modf", math.modf, x)
 
-bench_func_xy("ff_math_pow", math.pow, x, y)
-bench_func_xy("ff_math_atan2", math.atan2, x, y)
-bench_func_xy("ff_math_fmod", math.fmod, x, y)
-bench_func_xy("ff_math_ldexp", math.ldexp, x, y)
-bench_func_xy("ff_math_min", math.min, x, y)
-bench_func_xy("ff_math_max", math.max, x, y)
+bench_func_2("ff_math_pow", math.pow, x, y)
+bench_func_2("ff_math_atan2", math.atan2, x, y)
+bench_func_2("ff_math_fmod", math.fmod, x, y)
+bench_func_2("ff_math_ldexp", math.ldexp, x, y)
+bench_func_2("ff_math_min", math.min, x, y)
+bench_func_2("ff_math_max", math.max, x, y)
+
+------------------------------------------------------------------------------
+-- String library
+------------------------------------------------------------------------------
+
+bench_func_1("ff_string_byte", string.byte, "abcdefg")
+bench_func_2("ff_string_byte", string.byte, "abcdefg", 1)
+bench_func_2("ff_string_byte", string.byte, "abcdefg", 2)
+bench_func_2("ff_string_byte", string.byte, "abcdefg", 3)
+bench_func_2("ff_string_byte", string.byte, "abcdefg", 7)
+bench_func_3("ff_string_byte", string.byte, "abcdefg", 1, 2)
+bench_func_3("ff_string_byte", string.byte, "abcdefg", 1, 3)
+bench_func_3("ff_string_byte", string.byte, "abcdefg", 1, 7)
+
+bench_func_1("ff_string_char", string.char, 65)
+bench_func_1("ff_string_char", string.char, 79)
+bench_func_2("ff_string_char", string.char, 65, 82)
+bench_func_3("ff_string_char", string.char, 65, 82, 99)
+
+bench_func_2("ff_string_sub", string.sub, "foobar", 1)
+bench_func_2("ff_string_sub", string.sub, "foobar", 3)
+bench_func_3("ff_string_sub", string.sub, "foobar", 1, 3)
+bench_func_3("ff_string_sub", string.sub, "foobar", 3, 5)
+
+bench_func_1("ff_string_reverse", string.reverse, "abc")
+bench_func_1("ff_string_reverse", string.reverse, "foobar")
+bench_func_1("ff_string_reverse", string.reverse, "foobar123456")
+
+bench_func_1("ff_string_lower", string.lower, "ABC")
+bench_func_1("ff_string_lower", string.lower, "FOOBAR")
+bench_func_1("ff_string_lower", string.lower, "FOOBAR123456")
+
+bench_func_1("ff_string_upper", string.upper, "abc")
+bench_func_1("ff_string_upper", string.upper, "foobar")
+bench_func_1("ff_string_upper", string.upper, "foobar123456")
 
 ------------------------------------------------------------------------------
 -- END
@@ -1881,8 +1971,8 @@ if filter ~= nil then
 end
 write(format("\n"))
 
-write(format("   time |      c/i |    c/o | change | Bytecode         | Description\n"))
-write(format("--------|----------|--------|--------|------------------|-------------\n"))
+write(format("   time |      c/i |    c/o | change | Bytecode             | Description\n"))
+write(format("--------|----------|--------|--------|----------------------|-------------\n"))
 
 for i,t in ipairs(benches) do
     if filter == nil or string.find(lower(t.name), filter) then
@@ -1910,7 +2000,7 @@ for i,t in ipairs(benches) do
         else
             write(format(" | ------"))
         end
-        write(format(" | %-16s | %s\n", t.name, t.desc))
+        write(format(" | %-20s | %s\n", t.name, t.desc))
         if save_baseline then
             output:write(format("%d,%f,%f,%f,%s,%s\n", i, tm, iter, iter_ops, t.name, t.desc))
         end
