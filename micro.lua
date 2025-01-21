@@ -99,6 +99,10 @@ end
 local benches = {}
 
 local function bench(name, desc, func)
+    for i,j in ipairs(benches) do
+        assert(not (j.name == name and j.desc == desc),
+                "bench \""..name.."\" \""..desc.."\" already exists")
+    end
     benches[#benches+1] = { name = name, desc = desc, func = func }
 end
 
@@ -781,18 +785,6 @@ bench("ADDVN", "x = x + 1", function(n)
     return os.clock() - tm, 20
 end)
 
-bench("ADDVN", "x = x + 1", function(n)
-    local x = 0
-    local tm = os.clock()
-    for i = 1,n do
-        x = x + 1; x = x + 1; x = x + 1; x = x + 1; x = x + 1;
-        x = x + 1; x = x + 1; x = x + 1; x = x + 1; x = x + 1;
-        x = x + 1; x = x + 1; x = x + 1; x = x + 1; x = x + 1;
-        x = x + 1; x = x + 1; x = x + 1; x = x + 1; x = x + 1;
-    end
-    return os.clock() - tm, 20
-end)
-
 bench("ADDVN", "r = x + 1", function(n)
     local r, x = 0, 0
     local tm = os.clock()
@@ -832,18 +824,6 @@ end)
 ------------------------------------------------------------------------------
 -- SUBVV, SUBVN, SUBNV
 ------------------------------------------------------------------------------
-
-bench("SUBVN", "x = x - 1", function(n)
-    local x = 3
-    local tm = os.clock()
-    for i = 1,n do
-        x = x - 1; x = x - 1; x = x - 1; x = x - 1; x = x - 1;
-        x = x - 1; x = x - 1; x = x - 1; x = x - 1; x = x - 1;
-        x = x - 1; x = x - 1; x = x - 1; x = x - 1; x = x - 1;
-        x = x - 1; x = x - 1; x = x - 1; x = x - 1; x = x - 1;
-    end
-    return os.clock() - tm, 20
-end)
 
 bench("SUBVN", "x = x - 1", function(n)
     local x = 3
@@ -905,18 +885,6 @@ bench("MULVN", "x = x * 1", function(n)
         x = x * 1; x = x * 1; x = x * 1; x = x * 1; x = x * 1;
         x = x * 1; x = x * 1; x = x * 1; x = x * 1; x = x * 1;
         x = x * 1; x = x * 1; x = x * 1; x = x * 1; x = x * 1;
-    end
-    return os.clock() - tm, 20
-end)
-
-bench("MULVN", "r = x * 1", function(n)
-    local x, r = 1, 0
-    local tm = os.clock()
-    for i = 1,n do
-        r = x * 1; r = x * 1; r = x * 1; r = x * 1; r = x * 1;
-        r = x * 1; r = x * 1; r = x * 1; r = x * 1; r = x * 1;
-        r = x * 1; r = x * 1; r = x * 1; r = x * 1; r = x * 1;
-        r = x * 1; r = x * 1; r = x * 1; r = x * 1; r = x * 1;
     end
     return os.clock() - tm, 20
 end)
@@ -1921,14 +1889,14 @@ local t = {}
 for i = 1,30 do
     t[#t+1] = i
 end
-bench_func_1("ff_next", next, t)
+bench_func_1("ff_next", next, t, "array")
 bench_func_2("ff_next", next, t, 15)
 
 local t = {}
 for i = 1,99 do
     t["key"..i] = i
 end
-bench_func_1("ff_next", next, t)
+bench_func_1("ff_next", next, t, "map")
 bench_func_2("ff_next", next, t, "key1")
 bench_func_2("ff_next", next, t, "key33")
 bench_func_2("ff_next", next, t, "key99")
