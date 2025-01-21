@@ -117,12 +117,10 @@ local function bench_func(name, f, note, ...)
             desc = desc..format("%.1f", v)
         elseif t == "string" then
             desc = desc.."\""..v.."\""
-        elseif t == "table" then
-            desc = desc.."#table"
-        elseif t == "function" then
-            desc = desc.."#function"
+        elseif t == "boolean" or t == "nil" then
+            desc = desc..tostring(t)
         else
-            desc = desc..tostring(v)
+            desc = desc.."#"..t
         end
     end
     desc = desc..")"
@@ -2046,6 +2044,20 @@ bench_func_2("ff_bit_rshift", bit.rshift, 0x100, 8)
 bench_func_2("ff_bit_arshift", bit.arshift, -256, 8)
 bench_func_2("ff_bit_rol", bit.rol, 0x12345678, 8)
 bench_func_2("ff_bit_ror", bit.ror, 0x12345678, 8)
+
+------------------------------------------------------------------------------
+-- Coroutine library
+------------------------------------------------------------------------------
+
+local function co_test()
+    local yield = coroutine.yield
+    while true do
+        yield(123)
+    end
+end
+
+bench_func_1("ff_coroutine_resume", coroutine.resume, coroutine.create(co_test))
+bench_func_0("ff_coroutine_wrap", coroutine.wrap(co_test))
 
 ------------------------------------------------------------------------------
 -- END
