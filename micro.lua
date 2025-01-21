@@ -3,6 +3,7 @@ local write = io.write
 
 local default_path = "baseline.csv"
 
+local list_benchmarks = false
 local n = 1e4
 local repeats = 10
 local load_baseline = nil
@@ -18,6 +19,7 @@ local function print_usage()
     print("    FILTER                   REGEX strings to filter microbenchmarks")
     print()
     print("Available options:")
+    print("    -l                       List available benchmarks")
     print("    -i N                     Set iteration count to N")
     print("    -r N                     Set repeat count to N")
     print("    -b                       Load baseline from "..default_path)
@@ -33,6 +35,8 @@ for i,v in ipairs(arg) do
     elseif v == "-h" then
         print_usage()
         return
+    elseif v == "-l" then
+        list_benchmarks = true
     elseif v == "-i" then
         n = tonumber(arg[i + 1])
         if not n then
@@ -2031,6 +2035,28 @@ bench_func_0("ff_coroutine_wrap", coroutine.wrap(co_test))
 -- END
 ------------------------------------------------------------------------------
 
+local function is_enabled(name)
+    if #filter == 0 then return true end
+    local name = lower(name)
+    for i,f in ipairs(filter) do
+        if string.find(name, f) then
+            return true
+        end
+    end
+    return false
+end
+
+if list_benchmarks then
+    write(format(" group                | description\n"))
+    write(format("----------------------|-------------\n"))
+    for i,t in ipairs(benches) do
+        if is_enabled(t.name) then
+            write(format(" %-20s | %s\n", t.name, t.desc))
+        end
+    end
+    return 0
+end
+
 local baseline = {}
 
 if load_baseline then
@@ -2077,17 +2103,6 @@ write(format("      c/i |    c/o | change | change | group                | desc
 write(format("----------|--------|--------|--------|----------------------|-------------\n"))
 io.flush()
 
-local function is_enabled(name)
-    if #filter == 0 then return true end
-    local name = lower(name)
-    for i,f in ipairs(filter) do
-        if string.find(name, f) then
-            return true
-        end
-    end
-    return false
-end
-
 jit.off()
 
 for i,t in ipairs(benches) do
@@ -2129,5 +2144,3 @@ for i,t in ipairs(benches) do
         io.flush()
     end
 end
-
-write("\n")

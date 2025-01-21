@@ -34,6 +34,7 @@ Available positional items:
     FILTER                   REGEX strings to filter microbenchmarks
 
 Available options:
+    -l                       List available benchmarks
     -i N                     Set iteration count to N
     -r N                     Set repeat count to N
     -b                       Load baseline from baseline.csv
