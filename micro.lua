@@ -2131,6 +2131,34 @@ bench_func_1("ff_coroutine_resume", coroutine.resume, coroutine.create(co_test))
 bench_func_0("ff_coroutine_wrap", coroutine.wrap(co_test))
 
 ------------------------------------------------------------------------------
+-- GC
+------------------------------------------------------------------------------
+
+bench("GC", "simple", function(n)
+    local t = {}
+    local tm = os.clock()
+    for i = 1,n do
+        local l = {}
+        for j = 1,10 do
+            l[j] = {1,2,3,4}
+            local x = {}
+            local s = "1234"
+            x[1] = {s}
+            x[1000] = {"foo", i}
+            local y = {}
+            y[1] = {s}
+            y[1000] = function() return s, x end
+            local z = {}
+            z[1] = 0
+            z[1000] = function() return s, x, y end
+            l[j] = x
+            t[i] = l
+        end
+    end
+    return os.clock() - tm, 10
+end)
+
+------------------------------------------------------------------------------
 -- END
 ------------------------------------------------------------------------------
 
@@ -2198,8 +2226,8 @@ for i,f in ipairs(filter) do
     write(format("    filter: %s\n", f))
 end
 write(format("\n"))
-write(format("      c/i |    c/o | change | change | group                | description\n"))
-write(format("----------|--------|--------|--------|----------------------|-------------\n"))
+write(format("      c/i |     c/o | change | change | group                | description\n"))
+write(format("----------|---------|--------|--------|----------------------|-------------\n"))
 io.flush()
 
 jit.off()
@@ -2219,7 +2247,7 @@ for i,t in ipairs(benches) do
         local iter_ops = iter / ops
         local b = baseline[t.name] and baseline[t.name][t.desc]
         local diff = 0
-        write(format(" %8.1f | %6.1f", iter, iter_ops))
+        write(format(" %8.1f | %7.1f", iter, iter_ops))
         if b ~= nil then
             local diff = iter_ops - b.iter_ops
             local p = (iter_ops / b.iter_ops) * 100 - 100
