@@ -336,7 +336,7 @@ end)
 -- ISEQV
 ------------------------------------------------------------------------------
 
-bench("ISEQV", "taken", function(n)
+bench("ISEQV", "num, taken", function(n)
     local x, y = 1, 1
     local tm = os.clock()
     for i = 1,n do
@@ -348,8 +348,58 @@ bench("ISEQV", "taken", function(n)
     return os.clock() - tm, 20
 end)
 
-bench("ISEQV", "not taken", function(n)
+bench("ISEQV", "num, not taken", function(n)
     local x, y = 0, 1
+    local tm = os.clock()
+    for i = 1,n do
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISEQV", "str, taken", function(n)
+    local x = "foo"
+    local y = x
+    local tm = os.clock()
+    for i = 1,n do
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISEQV", "str, not taken", function(n)
+    local x, y = "foo", "bar"
+    local tm = os.clock()
+    for i = 1,n do
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISEQV", "tab, taken", function(n)
+    local x = {}
+    local y = x
+    local tm = os.clock()
+    for i = 1,n do
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+        if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISEQV", "tab, not taken", function(n)
+    local x, y = {}, {}
     local tm = os.clock()
     for i = 1,n do
         if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end; if x ~= y then end;
@@ -364,7 +414,7 @@ end)
 -- ISNEV
 ------------------------------------------------------------------------------
 
-bench("ISNEV", "taken", function(n)
+bench("ISNEV", "num, taken", function(n)
     local x, y = 0, 1
     local tm = os.clock()
     for i = 1,n do
@@ -376,8 +426,57 @@ bench("ISNEV", "taken", function(n)
     return os.clock() - tm, 20
 end)
 
-bench("ISNEV", "not taken", function(n)
+bench("ISNEV", "num, not taken", function(n)
     local x, y = 1, 1
+    local tm = os.clock()
+    for i = 1,n do
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISNEV", "str, taken", function(n)
+    local x, y = "foo", "bar"
+    local tm = os.clock()
+    for i = 1,n do
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISNEV", "str, not taken", function(n)
+    local x, y = "foo", "foo"
+    local tm = os.clock()
+    for i = 1,n do
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISNEV", "tab, taken", function(n)
+    local x, y = {}, {}
+    local tm = os.clock()
+    for i = 1,n do
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+        if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
+    end
+    return os.clock() - tm, 20
+end)
+
+bench("ISNEV", "tab, not taken", function(n)
+    local x = {}
+    local y = x
     local tm = os.clock()
     for i = 1,n do
         if x == y then end; if x == y then end; if x == y then end; if x == y then end; if x == y then end;
