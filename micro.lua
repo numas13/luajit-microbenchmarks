@@ -604,7 +604,7 @@ end)
 ------------------------------------------------------------------------------
 
 bench("ISEQP", "taken", function(n)
-    local x = 1
+    local x = nil
     local tm = os.clock()
     for i = 1,n do
         if x ~= nil then end; if x ~= nil then end; if x ~= nil then end; if x ~= nil then end; if x ~= nil then end;
@@ -644,7 +644,7 @@ bench("ISNEP", "taken", function(n)
 end)
 
 bench("ISNEP", "not taken", function(n)
-    local x = 1
+    local x = nil
     local tm = os.clock()
     for i = 1,n do
         if x == nil then end; if x == nil then end; if x == nil then end; if x == nil then end; if x == nil then end;
